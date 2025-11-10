@@ -18,6 +18,7 @@
 		Svg,
 		Line,
 		Spline,
+		Rule,
 		LinearGradient
 	} from 'layerchart';
 	import { curveBasis, curveNatural } from 'd3-shape';
@@ -25,6 +26,7 @@
 	import { Badge } from '@/shadcn/components/ui/badge';
 	import TrendingDownIcon from '@tabler/icons-svelte/icons/trending-down';
 	import TrendingUpIcon from '@tabler/icons-svelte/icons/trending-up';
+	import * as Avatar from '@/shadcn/components/ui/avatar/index.js';
 
 	let {
 		name,
@@ -1226,6 +1228,15 @@
 		[TimePeriod.Max]: 'Max'
 	};
 
+	const timeFilterTicks: Record<TimePeriod, number | undefined> = {
+		[TimePeriod.Day]: 6,
+		[TimePeriod.Week]: 7,
+		[TimePeriod.OneMonth]: 4,
+		[TimePeriod.SixMonths]: 6,
+		[TimePeriod.Year]: 6,
+		[TimePeriod.Max]: undefined
+	};
+
 	const timeFilterValuesInDays: Record<TimePeriod, number> = {
 		[TimePeriod.Day]: 1,
 		[TimePeriod.Week]: 7,
@@ -1248,9 +1259,19 @@
 		filteredData.reduce((acc, item) => acc + (item.high + item.low) / 2, 0) / filteredData.length
 	);
 
-	let trend = $derived(
+	let trendPercentage = $derived(
 		filteredData.length > 1 ? filteredData[filteredData.length - 1].close - filteredData[0].open : 0
 	);
+
+	let trendCurrency = $derived(
+		filteredData.length > 1
+			? ((filteredData[filteredData.length - 1].close - filteredData[0].open) /
+					filteredData[0].open) *
+					100
+			: 0
+	);
+
+	let current = $derived(chartData.sort((a, b) => b.date.getTime() - a.date.getTime())[0].close);
 
 	function formatDate(date: Date, period: TimePeriod): string {
 		switch (period) {
@@ -1258,23 +1279,35 @@
 				return new Intl.DateTimeFormat('en', { hour: 'numeric', minute: 'numeric' }).format(date);
 			case TimePeriod.Week:
 				return new Intl.DateTimeFormat('en', {
-					month: 'short',
 					day: 'numeric',
 					weekday: 'short'
 				}).format(date);
 			case TimePeriod.OneMonth:
+				return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(date);
 			case TimePeriod.SixMonths:
 			case TimePeriod.Year:
-				return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(date);
-			case TimePeriod.Max:
-				const totalDays = (startingDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
-				const period =
-					Object.entries(timeFilterValuesInDays).find(([, days]) => days < totalDays)?.[0] ??
-					TimePeriod.Max;
-				if (period !== TimePeriod.Max) {
-					return formatDate(date, period as TimePeriod);
+				return new Intl.DateTimeFormat('en', { month: 'short', year: '2-digit' }).format(date);
+			case TimePeriod.Max: {
+				const totalDays =
+					Math.abs(new Date().getTime() - startingDate.getTime()) / (1000 * 60 * 60 * 24);
+
+				// Sort by longest to shortest period
+				const sortedPeriods = Object.entries(timeFilterValuesInDays)
+					.filter(([key]) => key !== TimePeriod.Max)
+					.sort((a, b) => b[1] - a[1]);
+
+				// Find best matching smaller bucket
+				const bestMatch =
+					sortedPeriods.find(([, days]) => totalDays >= days)?.[0] ?? TimePeriod.Max;
+
+				console.log('Best match for date formatting:', totalDays, bestMatch);
+
+				// Recurse to reuse existing formatter
+				if (bestMatch !== TimePeriod.Max) {
+					return formatDate(date, bestMatch as TimePeriod);
 				}
 				return new Intl.DateTimeFormat('en', { year: 'numeric' }).format(date);
+			}
 			default:
 				return '';
 		}
@@ -1284,60 +1317,81 @@
 <Card.Root class="@container/card">
 	<Card.Header>
 		<Card.Title>
-			<div class="flex items-center space-x-4">
-				<div>
-					<p>{name}</p>
-					<p class="text-sm font-normal text-muted-foreground">{name}</p>
+			<div class="flex items-center justify-between space-x-4">
+				<div class="grid w-full grid-cols-[auto_1fr_auto_auto] grid-rows-2 items-center">
+					<Avatar.Root class="row-span-2 me-2">
+						<Avatar.Image src="https://github.com/shadcn.png" alt="@shadcn" />
+						<Avatar.Fallback>CN</Avatar.Fallback>
+					</Avatar.Root>
+					<p class="col-start-2">{name}</p>
+					<p class="col-start-2 text-sm font-normal text-muted-foreground">{name}</p>
+					<p class="col-start-3 row-start-1 text-end text-sm leading-none text-muted-foreground">
+						Maximum history
+					</p>
+					<p
+						class="col-start-3 text-end text-sm leading-none"
+						class:text-green-500={trendPercentage > 0}
+						class:text-red-500={trendPercentage < 0}
+					>
+						<span>
+							{trendPercentage > 0 ? '+' : '-'}{new Intl.NumberFormat('en', {
+								minimumFractionDigits: 2,
+								maximumFractionDigits: 2
+							}).format(Math.abs(trendPercentage))}%
+						</span>
+						<span class="text-muted-foreground">&nbsp;|&nbsp;</span>
+						<span>
+							{trendPercentage > 0 ? '+' : '-'}{new Intl.NumberFormat('en', {
+								minimumFractionDigits: 2,
+								maximumFractionDigits: 2
+							}).format(Math.abs(trendCurrency))}$
+						</span>
+					</p>
+					<h5 class="col-start-4 row-span-2 row-start-1 ms-4 !me-1 text-3xl leading-none">
+						{Math.floor(current)}
+					</h5>
+					<p class="col-start-5 row-start-1 mt-1 text-sm leading-none text-muted-foreground">
+						{Math.round((current % 1) * 100)}
+					</p>
+					<p class="-mt-1 text-sm leading-none text-muted-foreground">$</p>
 				</div>
-				<Badge variant="outline">
-					{#if trend > 0}
-						<TrendingUpIcon />
-					{:else}
-						<TrendingDownIcon />
-					{/if}
-					{trend > 0 ? '+' : '-'}{new Intl.NumberFormat('en', {
-						minimumFractionDigits: 2,
-						maximumFractionDigits: 2
-					}).format(Math.abs(trend))}%
-				</Badge>
 			</div>
 		</Card.Title>
-		<Card.Action>
-			<ToggleGroup.Root
-				type="single"
-				bind:value={period}
-				variant="outline"
-				class="hidden *:data-[slot=toggle-group-item]:!px-4 @[767px]/card:flex"
-			>
-				{#each getEnumValues(TimePeriod) as value (value)}
-					<ToggleGroup.Item {value}>{timeFilterLabels[value]}</ToggleGroup.Item>
-				{/each}
-			</ToggleGroup.Root>
-			<Select.Root type="single" bind:value={period}>
-				<Select.Trigger
-					size="sm"
-					class="flex w-40 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden"
-					aria-label="Select a value"
-				>
-					<span data-slot="select-value">
-						{timeFilterLabels[period]}
-					</span>
-				</Select.Trigger>
-				<Select.Content class="rounded-xl">
-					{#each getEnumValues(TimePeriod) as value (value)}
-						<Select.Item {value} class="rounded-lg">{timeFilterLabels[value]}</Select.Item>
-					{/each}
-				</Select.Content>
-			</Select.Root>
-		</Card.Action>
+		<Card.Action></Card.Action>
 	</Card.Header>
 	<Card.Content class="px-2 sm:px-6">
+		<ToggleGroup.Root
+			type="single"
+			bind:value={period}
+			variant="outline"
+			class="hidden w-full *:data-[slot=toggle-group-item]:!px-4 @[767px]/card:flex"
+		>
+			{#each getEnumValues(TimePeriod) as value (value)}
+				<ToggleGroup.Item {value}>{timeFilterLabels[value]}</ToggleGroup.Item>
+			{/each}
+		</ToggleGroup.Root>
+		<Select.Root type="single" bind:value={period}>
+			<Select.Trigger
+				size="sm"
+				class="mb-4 flex w-full **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden"
+				aria-label="Select a value"
+			>
+				<span data-slot="select-value">
+					{timeFilterLabels[period]}
+				</span>
+			</Select.Trigger>
+			<Select.Content class="rounded-xl">
+				{#each getEnumValues(TimePeriod) as value (value)}
+					<Select.Item {value} class="rounded-lg">{timeFilterLabels[value]}</Select.Item>
+				{/each}
+			</Select.Content>
+		</Select.Root>
 		{#key period}
 			<div class="aspect-auto h-[250px] w-full">
 				<BaseChart
 					data={filteredData}
 					x="date"
-					xScale={scaleBand().paddingInner(0.75)}
+					xScale={scaleTime()}
 					y={['high', 'low']}
 					yNice
 					c={(d) => (d.close < d.open ? 'desc' : 'asc')}
@@ -1351,45 +1405,71 @@
 							.domain([0, Math.max(...filteredData.map((d) => d.volume))])
 							.range([context.height, 0])}
 						{@const thresholdOffset =
-							(context.yScale(median) / (context.height + context.padding.bottom)) * 100 + '%'}
+							Math.min(Math.max((context.yScale(median) / context.height) * 100, 0), 100) + '%'}
 						<Svg>
-							<Axis placement="left" rule ticks={7} />
+							<Axis placement="left" grid ticks={5} />
 							<Axis
 								placement="right"
 								ticks={5}
-								rule
-								label="Volume"
 								scale={yScaleVolume}
-								format={formatCurrency}
+								format={(i) => formatCurrency(i * 4, '$')}
 							/>
-							<Axis placement="bottom" rule format={(d) => formatDate(d, period)} ticks={4} />
+							<Axis
+								placement="bottom"
+								grid
+								format={(d) => formatDate(d, period)}
+								ticks={timeFilterTicks[period]}
+							/>
 							{#each filteredData as d (d.date)}
 								<rect
-									x={context.xScale(d.date)}
-									y={yScaleVolume(d.volume)}
-									width={context.xScale.bandwidth?.()}
-									height={context.height - yScaleVolume(d.volume)}
+									x={context.xScale(d.date) - 8 / 2}
+									y={yScaleVolume(d.volume / 4)}
+									width={8}
+									height={context.height - yScaleVolume(d.volume / 4)}
 									fill="var(--color-gray-300)"
 								/>
 							{/each}
 							<LinearGradient
 								stops={[
-									[thresholdOffset, 'var(--color-green-500)'],
-									[thresholdOffset, 'var(--color-red-500)']
+									['0%', 'var(--color-blue-500)'],
+									[thresholdOffset, 'transparent'],
+									['100%', 'transparent']
 								]}
 								units="userSpaceOnUse"
 								vertical
 							>
 								{#snippet children({ gradient })}
-									<Spline y={(d) => [d.close]} stroke={gradient} fill="none" />
+									<Area
+										y0={(d) => [d.close]}
+										y1={(d) => [d.close]}
+										curve={curveNatural}
+										line={{ fill: gradient, stroke: 'none', style: 'opacity: 0.5;' }}
+									/>
 								{/snippet}
 							</LinearGradient>
-							{#if period === TimePeriod.Day || period === TimePeriod.Week}
-								<Points y={(d) => [d.open]} links r={0} />
-								<Bars y={(d) => [d.open, d.close]} radius={2} />
+							<LinearGradient
+								stops={[
+									['0%', 'var(--color-blue-500)'],
+									[thresholdOffset, 'var(--color-gray-500)']
+								]}
+								units="userSpaceOnUse"
+								vertical
+							>
+								{#snippet children({ gradient })}
+									<Spline
+										y={(d) => [d.close]}
+										strokeWidth={2}
+										stroke={gradient}
+										fill="none"
+										curve={curveNatural}
+									/>
+								{/snippet}
+							</LinearGradient>
 
-								<Highlight area />
-							{/if}
+							<Rule y={['high', 'low']} strokeWidth={2} />
+							<Rule y={['open', 'close']} strokeWidth={6} />
+
+							<Highlight lines area />
 						</Svg>
 					{/snippet}
 				</BaseChart>
