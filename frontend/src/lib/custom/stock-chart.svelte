@@ -22,6 +22,9 @@
 	} from 'layerchart';
 	import { curveBasis, curveNatural } from 'd3-shape';
 	import { formatCurrency, getEnumValues, TimePeriod } from '.';
+	import { Badge } from '@/shadcn/components/ui/badge';
+	import TrendingDownIcon from '@tabler/icons-svelte/icons/trending-down';
+	import TrendingUpIcon from '@tabler/icons-svelte/icons/trending-up';
 
 	let {
 		name,
@@ -1229,16 +1232,7 @@
 		[TimePeriod.OneMonth]: 30,
 		[TimePeriod.SixMonths]: 180,
 		[TimePeriod.Year]: 365,
-		[TimePeriod.Max]: 9999
-	};
-
-	const timeFilterTicks: Record<TimePeriod, TicksConfig | undefined> = {
-		[TimePeriod.Day]: 1,
-		[TimePeriod.Week]: 7,
-		[TimePeriod.OneMonth]: 5,
-		[TimePeriod.SixMonths]: 6,
-		[TimePeriod.Year]: 6,
-		[TimePeriod.Max]: undefined
+		[TimePeriod.Max]: 99999
 	};
 
 	const filteredData = $derived(
@@ -1253,17 +1247,61 @@
 	let median = $derived(
 		filteredData.reduce((acc, item) => acc + (item.high + item.low) / 2, 0) / filteredData.length
 	);
+
+	let trend = $derived(
+		filteredData.length > 1 ? filteredData[filteredData.length - 1].close - filteredData[0].open : 0
+	);
+
+	function formatDate(date: Date, period: TimePeriod): string {
+		switch (period) {
+			case TimePeriod.Day:
+				return new Intl.DateTimeFormat('en', { hour: 'numeric', minute: 'numeric' }).format(date);
+			case TimePeriod.Week:
+				return new Intl.DateTimeFormat('en', {
+					month: 'short',
+					day: 'numeric',
+					weekday: 'short'
+				}).format(date);
+			case TimePeriod.OneMonth:
+			case TimePeriod.SixMonths:
+			case TimePeriod.Year:
+				return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(date);
+			case TimePeriod.Max:
+				const totalDays = (startingDate.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
+				const period =
+					Object.entries(timeFilterValuesInDays).find(([, days]) => days < totalDays)?.[0] ??
+					TimePeriod.Max;
+				if (period !== TimePeriod.Max) {
+					return formatDate(date, period as TimePeriod);
+				}
+				return new Intl.DateTimeFormat('en', { year: 'numeric' }).format(date);
+			default:
+				return '';
+		}
+	}
 </script>
 
-{#snippet tooltipSnippet(context)}
-	<p class="text-red-500">Snippet content</p>
-{/snippet}
 <Card.Root class="@container/card">
 	<Card.Header>
-		<Card.Title>{name}</Card.Title>
-		<Card.Description>
-			<span class="">{name}</span>
-		</Card.Description>
+		<Card.Title>
+			<div class="flex items-center space-x-4">
+				<div>
+					<p>{name}</p>
+					<p class="text-sm font-normal text-muted-foreground">{name}</p>
+				</div>
+				<Badge variant="outline">
+					{#if trend > 0}
+						<TrendingUpIcon />
+					{:else}
+						<TrendingDownIcon />
+					{/if}
+					{trend > 0 ? '+' : '-'}{new Intl.NumberFormat('en', {
+						minimumFractionDigits: 2,
+						maximumFractionDigits: 2
+					}).format(Math.abs(trend))}%
+				</Badge>
+			</div>
+		</Card.Title>
 		<Card.Action>
 			<ToggleGroup.Root
 				type="single"
@@ -1307,10 +1345,6 @@
 					cDomain={['desc', 'asc']}
 					cRange={['#e41a1c', '#4daf4a']}
 					padding={{ left: 32, right: 32, bottom: 16 }}
-					tooltip={{
-						mode: 'bisect-x',
-						children: tooltipSnippet
-					}}
 				>
 					{#snippet children({ context })}
 						{@const yScaleVolume = scaleLinear()
@@ -1328,12 +1362,7 @@
 								scale={yScaleVolume}
 								format={formatCurrency}
 							/>
-							<Axis
-								placement="bottom"
-								rule
-								format={(d) => d.toISOString().split('T')[0]}
-								ticks={timeFilterTicks[period]}
-							/>
+							<Axis placement="bottom" rule format={(d) => formatDate(d, period)} ticks={4} />
 							{#each filteredData as d (d.date)}
 								<rect
 									x={context.xScale(d.date)}
@@ -1352,7 +1381,7 @@
 								vertical
 							>
 								{#snippet children({ gradient })}
-									<Spline y={(d) => [d.close]} stroke={gradient} />
+									<Spline y={(d) => [d.close]} stroke={gradient} fill="none" />
 								{/snippet}
 							</LinearGradient>
 							{#if period === TimePeriod.Day || period === TimePeriod.Week}
