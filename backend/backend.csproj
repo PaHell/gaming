@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -21,5 +21,15 @@
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
   </ItemGroup>
+
+    <Target Name="NSwag-Finnhub-Client" AfterTargets="PostBuildEvent" Condition=" '$(Configuration)' == 'Debug' ">
+		<Exec
+			WorkingDirectory="$(ProjectDir)"
+			EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development"
+			Command="$(NSwagExe_Net80) run Libraries/Finnhub/nswag.json /variables:Configuration=$(Configuration)">
+			<Output TaskParameter="ExitCode" PropertyName="NswagExitCode"/>
+			<Output TaskParameter="ConsoleOutput" PropertyName="NswagOutput"/>
+		</Exec>
+	</Target>
 
 </Project>
