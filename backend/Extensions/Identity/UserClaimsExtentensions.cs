@@ -7,7 +7,7 @@ namespace Backend.Data.Models.Identity
       {
             public static Guid GetId(this ClaimsPrincipal claimsPrincipal)
             {
-                  return Guid.Parse(claimsPrincipal.FindFirstValue(UserClaims.Id)!);
+                  return Guid.Parse(claimsPrincipal.FindFirstValue(UserClaims.UserId)!);
             }
 
             public static ApplicationRole GetRole(this ClaimsPrincipal claimsPrincipal)

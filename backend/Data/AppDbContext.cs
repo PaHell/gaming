@@ -2,6 +2,7 @@ using Backend.Configuration;
 using Backend.Data.Models;
 using Backend.Data.Models.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Backend.Data
 {
@@ -13,15 +14,7 @@ namespace Backend.Data
             protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             {
                   base.OnConfiguring(optionsBuilder);
-                  optionsBuilder.UseMySql(
-                        configuration.Database.GetConnectionString(),
-                        new MySqlServerVersion(new Version(9, 5, 0)),
-                        options =>
-                        {
-                              options.CommandTimeout(60);
-                              options.MigrationsHistoryTable("migrations");
-                        }
-                  );
+                  optionsBuilder.UseSqlServer(configuration.Database.GetConnectionString());
             }
       }
 }
