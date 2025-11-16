@@ -20,12 +20,12 @@
 #pragma warning disable 8625 // Disable "CS8625 Cannot convert null literal to non-nullable reference type"
 #pragma warning disable 8765 // Disable "CS8765 Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes)."
 
-namespace HttpClients
+namespace backend.Libraries
 {
     using System = global::System;
 
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial interface IFinnhubClient
+    public partial interface Ifinnhub
     {
         /// <summary>
         /// Symbol Lookup
@@ -2920,16 +2920,21 @@ namespace HttpClients
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class FinnhubClient : IFinnhubClient
+    public partial class finnhub : Ifinnhub
     {
+        #pragma warning disable 8618
+        private string _baseUrl;
+        #pragma warning restore 8618
+
         private System.Net.Http.HttpClient _httpClient;
         private static System.Lazy<Newtonsoft.Json.JsonSerializerSettings> _settings = new System.Lazy<Newtonsoft.Json.JsonSerializerSettings>(CreateSerializerSettings, true);
         private Newtonsoft.Json.JsonSerializerSettings _instanceSettings;
 
     #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-        public FinnhubClient(System.Net.Http.HttpClient httpClient)
+        public finnhub(System.Net.Http.HttpClient httpClient)
     #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
+            BaseUrl = "https://finnhub.io/api/v1";
             _httpClient = httpClient;
             Initialize();
         }
@@ -2939,6 +2944,17 @@ namespace HttpClients
             var settings = new Newtonsoft.Json.JsonSerializerSettings();
             UpdateJsonSerializerSettings(settings);
             return settings;
+        }
+
+        public string BaseUrl
+        {
+            get { return _baseUrl; }
+            set
+            {
+                _baseUrl = value;
+                if (!string.IsNullOrEmpty(_baseUrl) && !_baseUrl.EndsWith("/"))
+                    _baseUrl += '/';
+            }
         }
 
         protected Newtonsoft.Json.JsonSerializerSettings JsonSerializerSettings { get { return _instanceSettings ?? _settings.Value; } }
@@ -2992,7 +3008,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "search"
                     urlBuilder_.Append("search");
                     urlBuilder_.Append('?');
@@ -3100,7 +3116,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/symbol"
                     urlBuilder_.Append("stock/symbol");
                     urlBuilder_.Append('?');
@@ -3210,7 +3226,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/market-status"
                     urlBuilder_.Append("stock/market-status");
                     urlBuilder_.Append('?');
@@ -3308,7 +3324,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/market-holiday"
                     urlBuilder_.Append("stock/market-holiday");
                     urlBuilder_.Append('?');
@@ -3407,7 +3423,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/profile"
                     urlBuilder_.Append("stock/profile");
                     urlBuilder_.Append('?');
@@ -3517,7 +3533,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/profile2"
                     urlBuilder_.Append("stock/profile2");
                     urlBuilder_.Append('?');
@@ -3626,7 +3642,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/executive"
                     urlBuilder_.Append("stock/executive");
                     urlBuilder_.Append('?');
@@ -3726,7 +3742,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "news"
                     urlBuilder_.Append("news");
                     urlBuilder_.Append('?');
@@ -3838,7 +3854,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "company-news"
                     urlBuilder_.Append("company-news");
                     urlBuilder_.Append('?');
@@ -3942,7 +3958,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "press-releases"
                     urlBuilder_.Append("press-releases");
                     urlBuilder_.Append('?');
@@ -4048,7 +4064,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "news-sentiment"
                     urlBuilder_.Append("news-sentiment");
                     urlBuilder_.Append('?');
@@ -4148,7 +4164,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/peers"
                     urlBuilder_.Append("stock/peers");
                     urlBuilder_.Append('?');
@@ -4255,7 +4271,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/metric"
                     urlBuilder_.Append("stock/metric");
                     urlBuilder_.Append('?');
@@ -4356,7 +4372,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/price-metric"
                     urlBuilder_.Append("stock/price-metric");
                     urlBuilder_.Append('?');
@@ -4463,7 +4479,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "ca/symbol-change"
                     urlBuilder_.Append("ca/symbol-change");
                     urlBuilder_.Append('?');
@@ -4567,7 +4583,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "ca/isin-change"
                     urlBuilder_.Append("ca/isin-change");
                     urlBuilder_.Append('?');
@@ -4676,7 +4692,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/historical-market-cap"
                     urlBuilder_.Append("stock/historical-market-cap");
                     urlBuilder_.Append('?');
@@ -4786,7 +4802,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/historical-employee-count"
                     urlBuilder_.Append("stock/historical-employee-count");
                     urlBuilder_.Append('?');
@@ -4883,7 +4899,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "institutional/profile"
                     urlBuilder_.Append("institutional/profile");
                     urlBuilder_.Append('?');
@@ -4994,7 +5010,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "institutional/portfolio"
                     urlBuilder_.Append("institutional/portfolio");
                     urlBuilder_.Append('?');
@@ -5109,7 +5125,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "institutional/ownership"
                     urlBuilder_.Append("institutional/ownership");
                     urlBuilder_.Append('?');
@@ -5212,7 +5228,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/ownership"
                     urlBuilder_.Append("stock/ownership");
                     urlBuilder_.Append('?');
@@ -5316,7 +5332,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/fund-ownership"
                     urlBuilder_.Append("stock/fund-ownership");
                     urlBuilder_.Append('?');
@@ -5422,7 +5438,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/insider-transactions"
                     urlBuilder_.Append("stock/insider-transactions");
                     urlBuilder_.Append('?');
@@ -5538,7 +5554,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/insider-sentiment"
                     urlBuilder_.Append("stock/insider-sentiment");
                     urlBuilder_.Append('?');
@@ -5650,7 +5666,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/financials"
                     urlBuilder_.Append("stock/financials");
                     urlBuilder_.Append('?');
@@ -5761,7 +5777,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/financials-reported"
                     urlBuilder_.Append("stock/financials-reported");
                     urlBuilder_.Append('?');
@@ -5881,7 +5897,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/revenue-breakdown"
                     urlBuilder_.Append("stock/revenue-breakdown");
                     urlBuilder_.Append('?');
@@ -5993,7 +6009,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/filings"
                     urlBuilder_.Append("stock/filings");
                     urlBuilder_.Append('?');
@@ -6114,7 +6130,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/filings-sentiment"
                     urlBuilder_.Append("stock/filings-sentiment");
                     urlBuilder_.Append('?');
@@ -6213,7 +6229,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/similarity-index"
                     urlBuilder_.Append("stock/similarity-index");
                     urlBuilder_.Append('?');
@@ -6327,7 +6343,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "calendar/ipo"
                     urlBuilder_.Append("calendar/ipo");
                     urlBuilder_.Append('?');
@@ -6426,7 +6442,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "sector/metrics"
                     urlBuilder_.Append("sector/metrics");
                     urlBuilder_.Append('?');
@@ -6534,7 +6550,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/dividend"
                     urlBuilder_.Append("stock/dividend");
                     urlBuilder_.Append('?');
@@ -6634,7 +6650,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/recommendation"
                     urlBuilder_.Append("stock/recommendation");
                     urlBuilder_.Append('?');
@@ -6732,7 +6748,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/price-target"
                     urlBuilder_.Append("stock/price-target");
                     urlBuilder_.Append('?');
@@ -6831,7 +6847,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/upgrade-downgrade"
                     urlBuilder_.Append("stock/upgrade-downgrade");
                     urlBuilder_.Append('?');
@@ -6942,7 +6958,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/revenue-estimate"
                     urlBuilder_.Append("stock/revenue-estimate");
                     urlBuilder_.Append('?');
@@ -7046,7 +7062,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/ebitda-estimate"
                     urlBuilder_.Append("stock/ebitda-estimate");
                     urlBuilder_.Append('?');
@@ -7150,7 +7166,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/ebit-estimate"
                     urlBuilder_.Append("stock/ebit-estimate");
                     urlBuilder_.Append('?');
@@ -7254,7 +7270,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/eps-estimate"
                     urlBuilder_.Append("stock/eps-estimate");
                     urlBuilder_.Append('?');
@@ -7358,7 +7374,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/earnings"
                     urlBuilder_.Append("stock/earnings");
                     urlBuilder_.Append('?');
@@ -7463,7 +7479,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "calendar/earnings"
                     urlBuilder_.Append("calendar/earnings");
                     urlBuilder_.Append('?');
@@ -7576,7 +7592,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "quote"
                     urlBuilder_.Append("quote");
                     urlBuilder_.Append('?');
@@ -7689,7 +7705,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/candle"
                     urlBuilder_.Append("stock/candle");
                     urlBuilder_.Append('?');
@@ -7875,7 +7891,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/tick"
                     urlBuilder_.Append("stock/tick");
                     urlBuilder_.Append('?');
@@ -7991,7 +8007,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/bbo"
                     urlBuilder_.Append("stock/bbo");
                     urlBuilder_.Append('?');
@@ -8092,7 +8108,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/bidask"
                     urlBuilder_.Append("stock/bidask");
                     urlBuilder_.Append('?');
@@ -8200,7 +8216,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/split"
                     urlBuilder_.Append("stock/split");
                     urlBuilder_.Append('?');
@@ -8300,7 +8316,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/dividend2"
                     urlBuilder_.Append("stock/dividend2");
                     urlBuilder_.Append('?');
@@ -8398,7 +8414,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "index/constituents"
                     urlBuilder_.Append("index/constituents");
                     urlBuilder_.Append('?');
@@ -8496,7 +8512,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "index/historical-constituents"
                     urlBuilder_.Append("index/historical-constituents");
                     urlBuilder_.Append('?');
@@ -8593,7 +8609,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "etf/profile"
                     urlBuilder_.Append("etf/profile");
                     urlBuilder_.Append('?');
@@ -8701,7 +8717,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "etf/holdings"
                     urlBuilder_.Append("etf/holdings");
                     urlBuilder_.Append('?');
@@ -8813,7 +8829,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "etf/sector"
                     urlBuilder_.Append("etf/sector");
                     urlBuilder_.Append('?');
@@ -8917,7 +8933,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "etf/country"
                     urlBuilder_.Append("etf/country");
                     urlBuilder_.Append('?');
@@ -9021,7 +9037,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "mutual-fund/profile"
                     urlBuilder_.Append("mutual-fund/profile");
                     urlBuilder_.Append('?');
@@ -9127,7 +9143,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "mutual-fund/holdings"
                     urlBuilder_.Append("mutual-fund/holdings");
                     urlBuilder_.Append('?');
@@ -9235,7 +9251,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "mutual-fund/sector"
                     urlBuilder_.Append("mutual-fund/sector");
                     urlBuilder_.Append('?');
@@ -9339,7 +9355,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "mutual-fund/country"
                     urlBuilder_.Append("mutual-fund/country");
                     urlBuilder_.Append('?');
@@ -9444,7 +9460,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "mutual-fund/eet"
                     urlBuilder_.Append("mutual-fund/eet");
                     urlBuilder_.Append('?');
@@ -9542,7 +9558,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "mutual-fund/eet-pai"
                     urlBuilder_.Append("mutual-fund/eet-pai");
                     urlBuilder_.Append('?');
@@ -9635,7 +9651,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "forex/exchange"
                     urlBuilder_.Append("forex/exchange");
 
@@ -9730,7 +9746,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "forex/symbol"
                     urlBuilder_.Append("forex/symbol");
                     urlBuilder_.Append('?');
@@ -9843,7 +9859,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "forex/candle"
                     urlBuilder_.Append("forex/candle");
                     urlBuilder_.Append('?');
@@ -9943,7 +9959,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "forex/rates"
                     urlBuilder_.Append("forex/rates");
                     urlBuilder_.Append('?');
@@ -10043,7 +10059,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "crypto/exchange"
                     urlBuilder_.Append("crypto/exchange");
 
@@ -10138,7 +10154,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "crypto/symbol"
                     urlBuilder_.Append("crypto/symbol");
                     urlBuilder_.Append('?');
@@ -10236,7 +10252,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "crypto/profile"
                     urlBuilder_.Append("crypto/profile");
                     urlBuilder_.Append('?');
@@ -10349,7 +10365,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "crypto/candle"
                     urlBuilder_.Append("crypto/candle");
                     urlBuilder_.Append('?');
@@ -10455,7 +10471,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "scan/pattern"
                     urlBuilder_.Append("scan/pattern");
                     urlBuilder_.Append('?');
@@ -10559,7 +10575,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "scan/support-resistance"
                     urlBuilder_.Append("scan/support-resistance");
                     urlBuilder_.Append('?');
@@ -10663,7 +10679,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "scan/technical-indicator"
                     urlBuilder_.Append("scan/technical-indicator");
                     urlBuilder_.Append('?');
@@ -10788,7 +10804,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "indicator"
                     urlBuilder_.Append("indicator");
                     urlBuilder_.Append('?');
@@ -10890,7 +10906,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/transcripts/list"
                     urlBuilder_.Append("stock/transcripts/list");
                     urlBuilder_.Append('?');
@@ -10988,7 +11004,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/transcripts"
                     urlBuilder_.Append("stock/transcripts");
                     urlBuilder_.Append('?');
@@ -11087,7 +11103,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/earnings-call-live"
                     urlBuilder_.Append("stock/earnings-call-live");
                     urlBuilder_.Append('?');
@@ -11196,7 +11212,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/presentation"
                     urlBuilder_.Append("stock/presentation");
                     urlBuilder_.Append('?');
@@ -11298,7 +11314,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/social-sentiment"
                     urlBuilder_.Append("stock/social-sentiment");
                     urlBuilder_.Append('?');
@@ -11404,7 +11420,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/investment-theme"
                     urlBuilder_.Append("stock/investment-theme");
                     urlBuilder_.Append('?');
@@ -11502,7 +11518,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/supply-chain"
                     urlBuilder_.Append("stock/supply-chain");
                     urlBuilder_.Append('?');
@@ -11600,7 +11616,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/esg"
                     urlBuilder_.Append("stock/esg");
                     urlBuilder_.Append('?');
@@ -11698,7 +11714,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/historical-esg"
                     urlBuilder_.Append("stock/historical-esg");
                     urlBuilder_.Append('?');
@@ -11801,7 +11817,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/earnings-quality-score"
                     urlBuilder_.Append("stock/earnings-quality-score");
                     urlBuilder_.Append('?');
@@ -11895,7 +11911,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "covid19/us"
                     urlBuilder_.Append("covid19/us");
 
@@ -11985,7 +12001,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "fda-advisory-committee-calendar"
                     urlBuilder_.Append("fda-advisory-committee-calendar");
 
@@ -12090,7 +12106,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/uspto-patent"
                     urlBuilder_.Append("stock/uspto-patent");
                     urlBuilder_.Append('?');
@@ -12200,7 +12216,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/visa-application"
                     urlBuilder_.Append("stock/visa-application");
                     urlBuilder_.Append('?');
@@ -12310,7 +12326,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/lobbying"
                     urlBuilder_.Append("stock/lobbying");
                     urlBuilder_.Append('?');
@@ -12420,7 +12436,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/usa-spending"
                     urlBuilder_.Append("stock/usa-spending");
                     urlBuilder_.Append('?');
@@ -12530,7 +12546,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/congressional-trading"
                     urlBuilder_.Append("stock/congressional-trading");
                     urlBuilder_.Append('?');
@@ -12631,7 +12647,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "bond/profile"
                     urlBuilder_.Append("bond/profile");
                     urlBuilder_.Append('?');
@@ -12800,7 +12816,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "bond/price"
                     urlBuilder_.Append("bond/price");
                     urlBuilder_.Append('?');
@@ -12960,7 +12976,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "bond/tick"
                     urlBuilder_.Append("bond/tick");
                     urlBuilder_.Append('?');
@@ -13062,7 +13078,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "bond/yield-curve"
                     urlBuilder_.Append("bond/yield-curve");
                     urlBuilder_.Append('?');
@@ -13160,7 +13176,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "bank-branch"
                     urlBuilder_.Append("bank-branch");
                     urlBuilder_.Append('?');
@@ -13268,7 +13284,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "airline/price-index"
                     urlBuilder_.Append("airline/price-index");
                     urlBuilder_.Append('?');
@@ -13363,7 +13379,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "country"
                     urlBuilder_.Append("country");
 
@@ -13457,7 +13473,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "calendar/economic"
                     urlBuilder_.Append("calendar/economic");
                     urlBuilder_.Append('?');
@@ -13557,7 +13573,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "economic/code"
                     urlBuilder_.Append("economic/code");
 
@@ -13652,7 +13668,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "economic"
                     urlBuilder_.Append("economic");
                     urlBuilder_.Append('?');
@@ -13753,7 +13769,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/international-filings"
                     urlBuilder_.Append("stock/international-filings");
                     urlBuilder_.Append('?');
@@ -13866,7 +13882,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "stock/revenue-breakdown2"
                     urlBuilder_.Append("stock/revenue-breakdown2");
                     urlBuilder_.Append('?');
@@ -13965,7 +13981,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "ai-chat"
                     urlBuilder_.Append("ai-chat");
 
@@ -14061,7 +14077,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "global-filings/search"
                     urlBuilder_.Append("global-filings/search");
 
@@ -14157,7 +14173,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "global-filings/search-in-filing"
                     urlBuilder_.Append("global-filings/search-in-filing");
 
@@ -14254,7 +14270,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "global-filings/filter"
                     urlBuilder_.Append("global-filings/filter");
                     urlBuilder_.Append('?');
@@ -14356,7 +14372,7 @@ namespace HttpClients
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-                
+                    if (!string.IsNullOrEmpty(_baseUrl)) urlBuilder_.Append(_baseUrl);
                     // Operation Path: "global-filings/download"
                     urlBuilder_.Append("global-filings/download");
                     urlBuilder_.Append('?');

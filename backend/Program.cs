@@ -60,7 +60,7 @@ using var scope = app.Services.CreateScope();
 var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 //dbContext.Database.Migrate();
 
-//await GenerateCSharpClient.CreateAsync("./Libraries/Finnhub", "FinnhubClient");
+await GenerateCSharpClient.CreateAsync("./Libraries/finnhub.json", "./Libraries/FinnhubClient.cs");
 
 app.Run();
 
