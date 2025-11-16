@@ -6,27 +6,29 @@ namespace backend.Libraries
 {
     public static class GenerateCSharpClient
     {
-        public static async Task CreateAsync(string path, string className)
+        public static async Task CreateAsync(string input, string output)
         {
             var root = Directory.GetCurrentDirectory();
-            var fullPath = Path.Combine(root, $"{path}/swagger.json");
+            var fullPath = Path.Combine(root, input);
             var document = await OpenApiDocument.FromFileAsync(fullPath);
+            var fileName = Path.GetFileNameWithoutExtension(input);
+            var directory = Path.GetDirectoryName(output) ?? string.Empty;
             var settings = new CSharpClientGeneratorSettings
             {
                 UseBaseUrl = true,
-                ClassName = className,
+                ClassName = fileName,
                 GenerateClientInterfaces = true,
                 GenerateClientClasses = true,
                 CSharpGeneratorSettings =
                 {
-                    Namespace = "backend." + path.PathToNamespace(),
+                    Namespace = "backend." + directory.PathToNamespace(),
                 },
             };
 
             var generator = new CSharpClientGenerator(document, settings);
             var generatedCode = generator.GenerateFile();
 
-            var file = new FileInfo(path + "/Clients.cs");
+            var file = new FileInfo(output);
             await File.WriteAllTextAsync(file.FullName, generatedCode);
         }
     }
