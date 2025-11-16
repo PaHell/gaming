@@ -7,9 +7,10 @@
 	import ChartAreaInteractive from '$lib/shadcn/components/chart-area-interactive.svelte';
 	import DataTable from '$lib/shadcn/components/data-table.svelte';
 	import StockChart from '@/custom/stock-chart.svelte';
+	import { Button } from "$lib/shadcn/components/ui/button/index.js";
+	import { Separator } from "$lib/shadcn/components/ui/separator/index.js";
 </script>
 
-<SiteHeader />
 <div class="flex flex-1 flex-col">
 	<div class="@container/main flex flex-1 flex-col gap-2">
 		<div class="flex flex-col gap-4 py-4 md:gap-6 md:py-6">

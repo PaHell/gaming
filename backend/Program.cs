@@ -1,13 +1,10 @@
-using backend.Data.Repositories.AlphaVantage;
-using backend.Libraries;
-using backend.Services.Stocks;
+using Microsoft.EntityFrameworkCore;
 using Backend.Configuration;
 using Backend.Data;
-using Backend.Data.Models;
 using Backend.Data.Models.General;
 using Backend.Data.Repositories.Identity;
-using Microsoft.EntityFrameworkCore;
-using StockSharp.Algo.Indicators;
+using backend.Data.Repositories.AlphaVantage;
+using backend.Libraries;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,7 +31,7 @@ builder.Services
     .AddControllers();
 builder.Services.AddOpenApiDocument((options) =>
 {
-    options.Title = "Coruscant API Title";
+    options.Title = "Volatility API";
 });
 
 builder.Services.AddRouting(options =>
@@ -54,6 +51,14 @@ if (app.Environment.IsDevelopment())
 app.UseOpenApi();
 
 app.MapControllers();
+
+app.UseCors(policy =>
+{
+    policy.WithOrigins(config.CorsHosts.Split(','))
+          .AllowAnyHeader()
+          .AllowAnyMethod()
+          .AllowCredentials();
+});
 
 // Apply database migrations
 using var scope = app.Services.CreateScope();
