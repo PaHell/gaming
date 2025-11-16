@@ -19,14 +19,235 @@ export abstract class ClientBase {
       }
 }
 
-export interface IStockClient {
+export interface ICountryClient {
+
+    getAll(): Promise<CountryMetadata[]>;
+}
+
+export class CountryClient extends ClientBase implements ICountryClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super();
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    getAll(): Promise<CountryMetadata[]> {
+        let url_ = this.baseUrl + "/api/country";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetAll(_response));
+        });
+    }
+
+    protected processGetAll(response: Response): Promise<CountryMetadata[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        let _mappings: { source: any, target: any }[] = [];
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : jsonParse(_responseText, this.jsonParseReviver) as CountryMetadata[];
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<CountryMetadata[]>(null as any);
+    }
+}
+
+export interface IStockMarketNewsClient {
+
+    getMarketNews(category?: string | undefined, afterId?: number | undefined): Promise<MarketNews[]>;
+
+    getCompanyNews(symbol?: string | undefined, from?: string | undefined, to?: string | undefined): Promise<CompanyNews[]>;
+}
+
+export class StockMarketNewsClient extends ClientBase implements IStockMarketNewsClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super();
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    getMarketNews(category?: string | undefined, afterId?: number | undefined): Promise<MarketNews[]> {
+        let url_ = this.baseUrl + "/api/stockmarketnews/market?";
+        if (category === null)
+            throw new globalThis.Error("The parameter 'category' cannot be null.");
+        else if (category !== undefined)
+            url_ += "category=" + encodeURIComponent("" + category) + "&";
+        if (afterId === null)
+            throw new globalThis.Error("The parameter 'afterId' cannot be null.");
+        else if (afterId !== undefined)
+            url_ += "afterId=" + encodeURIComponent("" + afterId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetMarketNews(_response));
+        });
+    }
+
+    protected processGetMarketNews(response: Response): Promise<MarketNews[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        let _mappings: { source: any, target: any }[] = [];
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : jsonParse(_responseText, this.jsonParseReviver) as MarketNews[];
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<MarketNews[]>(null as any);
+    }
+
+    getCompanyNews(symbol?: string | undefined, from?: string | undefined, to?: string | undefined): Promise<CompanyNews[]> {
+        let url_ = this.baseUrl + "/api/stockmarketnews/company?";
+        if (symbol === null)
+            throw new globalThis.Error("The parameter 'symbol' cannot be null.");
+        else if (symbol !== undefined)
+            url_ += "symbol=" + encodeURIComponent("" + symbol) + "&";
+        if (from === null)
+            throw new globalThis.Error("The parameter 'from' cannot be null.");
+        else if (from !== undefined)
+            url_ += "from=" + encodeURIComponent("" + from) + "&";
+        if (to === null)
+            throw new globalThis.Error("The parameter 'to' cannot be null.");
+        else if (to !== undefined)
+            url_ += "to=" + encodeURIComponent("" + to) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetCompanyNews(_response));
+        });
+    }
+
+    protected processGetCompanyNews(response: Response): Promise<CompanyNews[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        let _mappings: { source: any, target: any }[] = [];
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : jsonParse(_responseText, this.jsonParseReviver) as CompanyNews[];
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<CompanyNews[]>(null as any);
+    }
+}
+
+export interface IStockPriceClient {
+
+    getQuote(symbol?: string | undefined): Promise<Quote>;
+}
+
+export class StockPriceClient extends ClientBase implements IStockPriceClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super();
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    getQuote(symbol?: string | undefined): Promise<Quote> {
+        let url_ = this.baseUrl + "/api/stockprice?";
+        if (symbol === null)
+            throw new globalThis.Error("The parameter 'symbol' cannot be null.");
+        else if (symbol !== undefined)
+            url_ += "symbol=" + encodeURIComponent("" + symbol) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetQuote(_response));
+        });
+    }
+
+    protected processGetQuote(response: Response): Promise<Quote> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        let _mappings: { source: any, target: any }[] = [];
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : jsonParse(_responseText, this.jsonParseReviver) as Quote;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<Quote>(null as any);
+    }
+}
+
+export interface IStockSymbolClient {
 
     search(term?: string | undefined): Promise<SymbolLookup>;
 
-    getForExchange(exchange?: string | undefined): Promise<StockSymbol[]>;
+    getSymbolsForExchange(value?: string | undefined): Promise<StockSymbol[]>;
 }
 
-export class StockClient extends ClientBase implements IStockClient {
+export class StockSymbolClient extends ClientBase implements IStockSymbolClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
@@ -38,7 +259,7 @@ export class StockClient extends ClientBase implements IStockClient {
     }
 
     search(term?: string | undefined): Promise<SymbolLookup> {
-        let url_ = this.baseUrl + "/api/stock/search?";
+        let url_ = this.baseUrl + "/api/stocksymbol/search?";
         if (term === null)
             throw new globalThis.Error("The parameter 'term' cannot be null.");
         else if (term !== undefined)
@@ -46,7 +267,7 @@ export class StockClient extends ClientBase implements IStockClient {
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: RequestInit = {
-            method: "POST",
+            method: "GET",
             headers: {
                 "Accept": "application/json"
             }
@@ -77,12 +298,12 @@ export class StockClient extends ClientBase implements IStockClient {
         return Promise.resolve<SymbolLookup>(null as any);
     }
 
-    getForExchange(exchange?: string | undefined): Promise<StockSymbol[]> {
-        let url_ = this.baseUrl + "/api/stock?";
-        if (exchange === null)
-            throw new globalThis.Error("The parameter 'exchange' cannot be null.");
-        else if (exchange !== undefined)
-            url_ += "exchange=" + encodeURIComponent("" + exchange) + "&";
+    getSymbolsForExchange(value?: string | undefined): Promise<StockSymbol[]> {
+        let url_ = this.baseUrl + "/api/stocksymbol/exchange?";
+        if (value === null)
+            throw new globalThis.Error("The parameter 'value' cannot be null.");
+        else if (value !== undefined)
+            url_ += "value=" + encodeURIComponent("" + value) + "&";
         url_ = url_.replace(/[?&]$/, "");
 
         let options_: RequestInit = {
@@ -95,11 +316,11 @@ export class StockClient extends ClientBase implements IStockClient {
         return this.transformOptions(options_).then(transformedOptions_ => {
             return this.http.fetch(url_, transformedOptions_);
         }).then((_response: Response) => {
-            return this.transformResult(url_, _response, (_response: Response) => this.processGetForExchange(_response));
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetSymbolsForExchange(_response));
         });
     }
 
-    protected processGetForExchange(response: Response): Promise<StockSymbol[]> {
+    protected processGetSymbolsForExchange(response: Response): Promise<StockSymbol[]> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         let _mappings: { source: any, target: any }[] = [];
@@ -116,6 +337,114 @@ export class StockClient extends ClientBase implements IStockClient {
         }
         return Promise.resolve<StockSymbol[]>(null as any);
     }
+}
+
+export interface ICompanyProfileClient {
+
+    getProfile(symbol?: string | null | undefined, isin?: string | null | undefined, cusip?: string | null | undefined): Promise<CompanyProfile2>;
+}
+
+export class CompanyProfileClient extends ClientBase implements ICompanyProfileClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super();
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    getProfile(symbol?: string | null | undefined, isin?: string | null | undefined, cusip?: string | null | undefined): Promise<CompanyProfile2> {
+        let url_ = this.baseUrl + "/api/companyprofile?";
+        if (symbol !== undefined && symbol !== null)
+            url_ += "symbol=" + encodeURIComponent("" + symbol) + "&";
+        if (isin !== undefined && isin !== null)
+            url_ += "isin=" + encodeURIComponent("" + isin) + "&";
+        if (cusip !== undefined && cusip !== null)
+            url_ += "cusip=" + encodeURIComponent("" + cusip) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetProfile(_response));
+        });
+    }
+
+    protected processGetProfile(response: Response): Promise<CompanyProfile2> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        let _mappings: { source: any, target: any }[] = [];
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : jsonParse(_responseText, this.jsonParseReviver) as CompanyProfile2;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<CompanyProfile2>(null as any);
+    }
+}
+
+export interface CountryMetadata {
+    country?: string | null;
+    code2?: string | null;
+    code3?: string | null;
+    codeNo?: string | null;
+    currency?: string | null;
+    currencyCode?: string | null;
+    region?: string | null;
+    subRegion?: string | null;
+    rating?: string | null;
+    defaultSpread?: number | null;
+    countryRiskPremium?: number | null;
+    equityRiskPremium?: number | null;
+}
+
+export interface MarketNews {
+    category?: string | null;
+    datetime?: number | null;
+    headline?: string | null;
+    id?: number | null;
+    image?: string | null;
+    related?: string | null;
+    source?: string | null;
+    summary?: string | null;
+    url?: string | null;
+}
+
+export interface CompanyNews {
+    category?: string | null;
+    datetime?: number | null;
+    headline?: string | null;
+    id?: number | null;
+    image?: string | null;
+    related?: string | null;
+    source?: string | null;
+    summary?: string | null;
+    url?: string | null;
+}
+
+export interface Quote {
+    o?: number | null;
+    h?: number | null;
+    l?: number | null;
+    c?: number | null;
+    pc?: number | null;
+    d?: number | null;
+    dp?: number | null;
 }
 
 export interface SymbolLookup {
@@ -141,6 +470,21 @@ export interface StockSymbol {
     currency?: string | null;
     symbol2?: string | null;
     isin?: string | null;
+}
+
+export interface CompanyProfile2 {
+    country?: string | null;
+    currency?: string | null;
+    exchange?: string | null;
+    name?: string | null;
+    ticker?: string | null;
+    ipo?: string | null;
+    marketCapitalization?: number | null;
+    shareOutstanding?: number | null;
+    logo?: string | null;
+    phone?: string | null;
+    weburl?: string | null;
+    finnhubIndustry?: string | null;
 }
 
 function jsonParse(json: any, reviver?: any) {

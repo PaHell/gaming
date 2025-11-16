@@ -85,10 +85,6 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\Stocks\" />
-  </ItemGroup>
-
   <Target Name="NSwag" BeforeTargets="AfterBuild" Condition=" '$(Configuration)' ==&#xD;&#xA;  'Debug' ">
     <Exec WorkingDirectory="$(ProjectDir)" EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development" Command="$(NSwagExe_Net90) run nswag.json /variables:Configuration=$(Configuration)">
       <Output TaskParameter="ExitCode" PropertyName="NswagExitCode" />
