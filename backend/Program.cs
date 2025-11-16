@@ -3,7 +3,7 @@ using Backend.Configuration;
 using Backend.Data;
 using Backend.Data.Models.General;
 using Backend.Data.Repositories.Identity;
-using backend.Data.Repositories.AlphaVantage;
+using backend.Data.Repositories.Stocks;
 using backend.Libraries;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,12 +15,14 @@ builder.Configuration.Bind(config);
 // Register services
 builder.Services.AddSingleton(config);
 builder.Services.AddDbContext<AppDbContext>();
+builder.Services.AddHttpClient();
 builder.Services.AddSingleton(new AppCache());
+
 
 // Register repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserSessionRepository, UserSessionRepository>();
-builder.Services.AddScoped<IAlphaVantageRepository, AlphaVantageRepository>();
+builder.Services.AddScoped<IStockRepository, StockRepository>();
 
 // Add database
 

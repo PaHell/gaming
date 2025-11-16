@@ -25,7 +25,7 @@ namespace backend.Libraries
     using System = global::System;
 
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial interface Ifinnhub
+    public partial interface IFinnhubClient
     {
         /// <summary>
         /// Symbol Lookup
@@ -2920,7 +2920,7 @@ namespace backend.Libraries
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "14.6.2.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class finnhub : Ifinnhub
+    public partial class FinnhubClient : IFinnhubClient
     {
         #pragma warning disable 8618
         private string _baseUrl;
@@ -2931,7 +2931,7 @@ namespace backend.Libraries
         private Newtonsoft.Json.JsonSerializerSettings _instanceSettings;
 
     #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-        public finnhub(System.Net.Http.HttpClient httpClient)
+        public FinnhubClient(System.Net.Http.HttpClient httpClient)
     #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
             BaseUrl = "https://finnhub.io/api/v1";

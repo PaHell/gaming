@@ -1,6 +1,7 @@
 ﻿using backend.Extensions;
 using NSwag;
 using NSwag.CodeGeneration.CSharp;
+using System.Reflection;
 
 namespace backend.Libraries
 {
@@ -11,17 +12,23 @@ namespace backend.Libraries
             var root = Directory.GetCurrentDirectory();
             var fullPath = Path.Combine(root, input);
             var document = await OpenApiDocument.FromFileAsync(fullPath);
-            var fileName = Path.GetFileNameWithoutExtension(input);
+            var fileName = Path.GetFileNameWithoutExtension(output);
             var directory = Path.GetDirectoryName(output) ?? string.Empty;
             var settings = new CSharpClientGeneratorSettings
             {
                 UseBaseUrl = true,
+                ClientBaseClass = null,
                 ClassName = fileName,
                 GenerateClientInterfaces = true,
                 GenerateClientClasses = true,
+                DisposeHttpClient = false,
+                InjectHttpClient = true,
+                UseHttpClientCreationMethod = false,
+                UseHttpRequestMessageCreationMethod = false,
                 CSharpGeneratorSettings =
                 {
                     Namespace = "backend." + directory.PathToNamespace(),
+                    GenerateDefaultValues = true
                 },
             };
 

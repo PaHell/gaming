@@ -19,12 +19,14 @@ export abstract class ClientBase {
       }
 }
 
-export interface IStockSymbolClient {
+export interface IStockClient {
 
-    search(term?: string | undefined): Promise<SymbolSearchMatch[]>;
+    search(term?: string | undefined): Promise<SymbolLookup>;
+
+    getForExchange(exchange?: string | undefined): Promise<StockSymbol[]>;
 }
 
-export class StockSymbolClient extends ClientBase implements IStockSymbolClient {
+export class StockClient extends ClientBase implements IStockClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
@@ -35,8 +37,8 @@ export class StockSymbolClient extends ClientBase implements IStockSymbolClient 
         this.baseUrl = baseUrl ?? "";
     }
 
-    search(term?: string | undefined): Promise<SymbolSearchMatch[]> {
-        let url_ = this.baseUrl + "/api/stocksymbol/search?";
+    search(term?: string | undefined): Promise<SymbolLookup> {
+        let url_ = this.baseUrl + "/api/stock/search?";
         if (term === null)
             throw new globalThis.Error("The parameter 'term' cannot be null.");
         else if (term !== undefined)
@@ -57,14 +59,14 @@ export class StockSymbolClient extends ClientBase implements IStockSymbolClient 
         });
     }
 
-    protected processSearch(response: Response): Promise<SymbolSearchMatch[]> {
+    protected processSearch(response: Response): Promise<SymbolLookup> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         let _mappings: { source: any, target: any }[] = [];
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
-            result200 = _responseText === "" ? null : jsonParse(_responseText, this.jsonParseReviver) as SymbolSearchMatch[];
+            result200 = _responseText === "" ? null : jsonParse(_responseText, this.jsonParseReviver) as SymbolLookup;
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -72,20 +74,73 @@ export class StockSymbolClient extends ClientBase implements IStockSymbolClient 
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<SymbolSearchMatch[]>(null as any);
+        return Promise.resolve<SymbolLookup>(null as any);
+    }
+
+    getForExchange(exchange?: string | undefined): Promise<StockSymbol[]> {
+        let url_ = this.baseUrl + "/api/stock?";
+        if (exchange === null)
+            throw new globalThis.Error("The parameter 'exchange' cannot be null.");
+        else if (exchange !== undefined)
+            url_ += "exchange=" + encodeURIComponent("" + exchange) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processGetForExchange(_response));
+        });
+    }
+
+    protected processGetForExchange(response: Response): Promise<StockSymbol[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        let _mappings: { source: any, target: any }[] = [];
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : jsonParse(_responseText, this.jsonParseReviver) as StockSymbol[];
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<StockSymbol[]>(null as any);
     }
 }
 
-export interface SymbolSearchMatch {
-    symbol?: string;
-    name?: string;
-    type?: string;
-    region?: string;
-    marketOpen?: string;
-    marketClose?: string;
-    timezone?: string;
-    currency?: string;
-    matchScore?: number;
+export interface SymbolLookup {
+    result?: SymbolLookupInfo[] | null;
+    count?: number | null;
+}
+
+export interface SymbolLookupInfo {
+    description?: string | null;
+    displaySymbol?: string | null;
+    symbol?: string | null;
+    type?: string | null;
+}
+
+export interface StockSymbol {
+    description?: string | null;
+    displaySymbol?: string | null;
+    symbol?: string | null;
+    type?: string | null;
+    mic?: string | null;
+    figi?: string | null;
+    shareClassFIGI?: string | null;
+    currency?: string | null;
+    symbol2?: string | null;
+    isin?: string | null;
 }
 
 function jsonParse(json: any, reviver?: any) {
