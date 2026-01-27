@@ -22,6 +22,12 @@ public partial class Program
         var config = new ApplicationConfiguration();
         builder.Configuration.Bind(config);
 
+        // Validate JWT secret key
+        if (string.IsNullOrEmpty(config.Token.SecretKey) || config.Token.SecretKey.Length < 32)
+        {
+            throw new InvalidOperationException("Token.SecretKey must be at least 32 characters long for security.");
+        }
+
         // Register services
         builder.Services.AddSingleton(config);
         builder.Services.AddDbContext<AppDbContext>();
@@ -54,22 +60,32 @@ public partial class Program
                 ValidIssuer = config.Token.Issuer,
                 ValidAudience = config.Token.Audience,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.Token.SecretKey)),
-                ClockSkew = TimeSpan.Zero,
-                // Prevent claim type mapping
+                // Small clock skew to handle minor clock differences between servers
+                ClockSkew = TimeSpan.FromMinutes(1),
+                // Set custom claim types to match JWT token structure
                 NameClaimType = UserClaims.UserId,
                 RoleClaimType = UserClaims.Role
             };
 
-            // Configure cookie authentication for JWT
+            // Configure cookie and header authentication for JWT
             options.Events = new JwtBearerEvents
             {
                 OnMessageReceived = context =>
                 {
-                    // Read token from cookie
-                    var accessToken = context.Request.Cookies[CookieConfiguration.AccessTokenName];
-                    if (!string.IsNullOrEmpty(accessToken))
+                    // First check for token in Authorization header (standard approach)
+                    var authHeader = context.Request.Headers.Authorization.ToString();
+                    if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                     {
-                        context.Token = accessToken;
+                        context.Token = authHeader.Substring("Bearer ".Length).Trim();
+                    }
+                    // Fall back to cookie-based token if not in header
+                    else
+                    {
+                        var accessToken = context.Request.Cookies[CookieConfiguration.AccessTokenName];
+                        if (!string.IsNullOrEmpty(accessToken))
+                        {
+                            context.Token = accessToken;
+                        }
                     }
                     return Task.CompletedTask;
                 }
@@ -117,11 +133,7 @@ public partial class Program
 
         app.UseOpenApi();
 
-        app.UseAuthentication();
-        app.UseAuthorization();
-
-        app.MapControllers();
-
+        // CORS must be called early in the pipeline
         app.UseCors(policy =>
         {
             var corsHosts = config.CorsHosts.Split(',');
@@ -141,6 +153,11 @@ public partial class Program
                       .AllowCredentials();
             }
         });
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.MapControllers();
 
         // Apply database migrations
         using var scope = app.Services.CreateScope();

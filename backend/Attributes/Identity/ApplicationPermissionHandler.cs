@@ -13,12 +13,20 @@ namespace Backend.Attributes.Identity
                 return Task.CompletedTask;
             }
 
-            var userRole = context.User.GetRole();
-            
-            // Check if user's role meets or exceeds the required role
-            if (userRole >= requirement.LowestRequiredRole)
+            try
             {
-                context.Succeed(requirement);
+                var userRole = context.User.GetRole();
+                
+                // Check if user's role meets or exceeds the required role
+                if (userRole >= requirement.LowestRequiredRole)
+                {
+                    context.Succeed(requirement);
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Role claim is missing or invalid, fail silently
+                // The authorization will fail and return 403
             }
 
             return Task.CompletedTask;

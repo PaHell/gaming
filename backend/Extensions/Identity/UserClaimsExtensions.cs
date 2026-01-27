@@ -13,7 +13,13 @@ namespace Backend.Extensions.Identity
                   {
                         throw new UnauthorizedAccessException("User ID claim not found");
                   }
-                  return Guid.Parse(claim);
+                  
+                  if (!Guid.TryParse(claim, out var userId))
+                  {
+                        throw new UnauthorizedAccessException("User ID claim has invalid format");
+                  }
+                  
+                  return userId;
             }
 
             public static ApplicationRole GetRole(this ClaimsPrincipal claimsPrincipal)
@@ -23,7 +29,13 @@ namespace Backend.Extensions.Identity
                   {
                         throw new UnauthorizedAccessException("Role claim not found");
                   }
-                  return (ApplicationRole)int.Parse(claim);
+                  
+                  if (!int.TryParse(claim, out var roleValue))
+                  {
+                        throw new UnauthorizedAccessException("Role claim has invalid format");
+                  }
+                  
+                  return (ApplicationRole)roleValue;
             }
 
             public static Guid GetSessionId(this ClaimsPrincipal claimsPrincipal)
@@ -33,7 +45,13 @@ namespace Backend.Extensions.Identity
                 {
                       throw new UnauthorizedAccessException("Session ID claim not found");
                 }
-                return Guid.Parse(claim);
+                
+                if (!Guid.TryParse(claim, out var sessionId))
+                {
+                      throw new UnauthorizedAccessException("Session ID claim has invalid format");
+                }
+                
+                return sessionId;
             }
     }
 }
