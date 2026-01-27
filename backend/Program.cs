@@ -1,18 +1,13 @@
-using Microsoft.EntityFrameworkCore;
+using backend.Data.Repositories.Gaming;
 using Backend.Configuration;
 using Backend.Data;
 using Backend.Data.Models.General;
 using Backend.Data.Repositories.Identity;
-using backend.Data.Repositories.Stocks;
-using backend.Libraries;
-using backend.Services.Stocks;
-using backend.Data.Repositories.Companies;
-using backend.Data.Repositories;
+using Backend.Services.Identity;
+using Microsoft.EntityFrameworkCore;
 
 public partial class Program
 {
-    public static readonly string FINNHUB_HTTP_CLIENT = "Finnhub";
-
     private static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
@@ -25,23 +20,16 @@ public partial class Program
         builder.Services.AddSingleton(config);
         builder.Services.AddDbContext<AppDbContext>();
         builder.Services.AddHttpClient();
-        builder.Services.AddHttpClient(FINNHUB_HTTP_CLIENT, configure =>
-        {
-            configure.DefaultRequestHeaders.Add("X-Finnhub-Token", config.FinnhubApiKey);
-        });
         builder.Services.AddSingleton(new AppCache());
+        builder.Services.AddSingleton<UserService>();
 
         // Register repositories
         builder.Services.AddScoped<IUserRepository, UserRepository>();
-        builder.Services.AddScoped<ICountryRepository, CountryRepository>();
         builder.Services.AddScoped<IUserSessionRepository, UserSessionRepository>();
-        builder.Services.AddScoped<ICompanyProfileRepository, CompanyProfileRepository>();
-        builder.Services.AddScoped<IStockMarketNewsRepository, StockMarketNewsRepository>();
-        builder.Services.AddScoped<IStockPriceRepository, StockPriceRepository>();
-        builder.Services.AddScoped<IStockSymbolRepository, StockSymbolRepository>();
+        builder.Services.AddScoped<IUserGameScoreRepository, UserGameScoreRepository>();
 
         // Register hosted services
-        builder.Services.AddHostedService<StockSymbolService>();
+        //builder.Services.AddHostedService<StockSymbolService>();
 
         // Add database
 
@@ -52,7 +40,7 @@ public partial class Program
             .AddControllers();
         builder.Services.AddOpenApiDocument((options) =>
         {
-            options.Title = "Volatility API";
+            options.Title = config.AppTitle;
             options.UseControllerSummaryAsTagDescription = true;
         });
 
@@ -85,9 +73,7 @@ public partial class Program
         // Apply database migrations
         using var scope = app.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        //dbContext.Database.Migrate();
-
-        await GenerateCSharpClient.CreateAsync("./Libraries/finnhub.json", "./Libraries/FinnhubClient.cs");
+        dbContext.Database.Migrate();
 
         app.Run();
     }

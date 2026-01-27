@@ -1,3 +1,4 @@
+using backend.Data.Models.Gaming;
 using Backend.Configuration;
 using Backend.Data.Models;
 using Backend.Data.Models.Identity;
@@ -10,11 +11,20 @@ namespace Backend.Data
       {
             public DbSet<User> Users { get; set; }
             public DbSet<UserSession> UserSessions { get; set; }
+            public DbSet<UserGameScore> UserGameScores { get; set; }
 
             protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             {
                   base.OnConfiguring(optionsBuilder);
-                  optionsBuilder.UseSqlServer(configuration.Database.GetConnectionString());
+                  optionsBuilder
+                    .UseMySQL(configuration.Database.GetConnectionString(),
+                        options => options.CommandTimeout(0))
+                    .UseSnakeCaseNamingConvention();
             }
+            protected override void OnModelCreating(ModelBuilder modelBuilder)
+            {
+                modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+            }
+      
       }
 }

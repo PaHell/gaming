@@ -1,8 +1,8 @@
 using Backend.Attributes.Identity;
 using Backend.Data.Enums.Identity;
 using Backend.Data.Models.Base;
-using Backend.Data.Models.Identity;
 using Backend.Data.Repositories.Identity;
+using Backend.Extensions.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 namespace Backend.Controllers.Identity
