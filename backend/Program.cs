@@ -3,6 +3,7 @@ using Backend.Attributes.Identity;
 using Backend.Configuration;
 using Backend.Data;
 using Backend.Data.Models.General;
+using Backend.Data.Models.Identity;
 using Backend.Data.Repositories.Identity;
 using Backend.Services.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -53,7 +54,10 @@ public partial class Program
                 ValidIssuer = config.Token.Issuer,
                 ValidAudience = config.Token.Audience,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.Token.SecretKey)),
-                ClockSkew = TimeSpan.Zero
+                ClockSkew = TimeSpan.Zero,
+                // Prevent claim type mapping
+                NameClaimType = UserClaims.UserId,
+                RoleClaimType = UserClaims.Role
             };
 
             // Configure cookie authentication for JWT
@@ -70,6 +74,9 @@ public partial class Program
                     return Task.CompletedTask;
                 }
             };
+
+            // Disable JWT claim type mapping to prevent automatic transformation
+            options.MapInboundClaims = false;
         });
 
         // Configure Authorization
@@ -117,10 +124,22 @@ public partial class Program
 
         app.UseCors(policy =>
         {
-            policy.WithOrigins(config.CorsHosts.Split(','))
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .AllowCredentials();
+            var corsHosts = config.CorsHosts.Split(',');
+            if (corsHosts.Contains("*"))
+            {
+                // Allow any origin when wildcard is specified, but can't use credentials
+                policy.AllowAnyOrigin()
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
+            }
+            else
+            {
+                // Specific origins can use credentials
+                policy.WithOrigins(corsHosts)
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials();
+            }
         });
 
         // Apply database migrations
