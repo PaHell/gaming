@@ -1,10 +1,16 @@
 using backend.Data.Repositories.Gaming;
+using Backend.Attributes.Identity;
 using Backend.Configuration;
 using Backend.Data;
 using Backend.Data.Models.General;
+using Backend.Data.Models.Identity;
 using Backend.Data.Repositories.Identity;
 using Backend.Services.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 public partial class Program
 {
@@ -15,6 +21,12 @@ public partial class Program
         // Bind configuration
         var config = new ApplicationConfiguration();
         builder.Configuration.Bind(config);
+
+        // Validate JWT secret key
+        if (string.IsNullOrEmpty(config.Token.SecretKey) || config.Token.SecretKey.Length < 32)
+        {
+            throw new InvalidOperationException("Token.SecretKey must be at least 32 characters long for security.");
+        }
 
         // Register services
         builder.Services.AddSingleton(config);
@@ -31,13 +43,59 @@ public partial class Program
         // Register hosted services
         //builder.Services.AddHostedService<StockSymbolService>();
 
+        // Configure Cookie-based JWT Authentication (compatible with AuthenticationController)
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = config.Token.Issuer,
+                ValidAudience = config.Token.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.Token.SecretKey)),
+                ClockSkew = TimeSpan.FromMinutes(1),
+                NameClaimType = UserClaims.UserId,
+                RoleClaimType = UserClaims.Role
+            };
+
+            // Read JWT token from cookies (set by UserService.SignInAsync)
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    // Read token from access_token cookie
+                    var accessToken = context.Request.Cookies[CookieConfiguration.AccessTokenName];
+                    if (!string.IsNullOrEmpty(accessToken))
+                    {
+                        context.Token = accessToken;
+                    }
+                    return Task.CompletedTask;
+                }
+            };
+
+            // Disable JWT claim type mapping
+            options.MapInboundClaims = false;
+        });
+
+        // Configure Authorization
+        builder.Services.AddAuthorization();
+        builder.Services.AddSingleton<IAuthorizationPolicyProvider, ApplicationPermissionPolicyProvider>();
+        builder.Services.AddSingleton<IAuthorizationHandler, ApplicationPermissionHandler>();
+
         // Add database
 
         // Add services to the container.
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services
             .AddEndpointsApiExplorer()
-            .AddControllers();
+            .AddControllers(options =>
+            {
+                // Add global authorization filter
+                options.Filters.Add<ApplicationPermissionFilter>();
+            });
         builder.Services.AddOpenApiDocument((options) =>
         {
             options.Title = config.AppTitle;
@@ -60,15 +118,31 @@ public partial class Program
 
         app.UseOpenApi();
 
-        app.MapControllers();
-
+        // CORS must be called early in the pipeline
         app.UseCors(policy =>
         {
-            policy.WithOrigins(config.CorsHosts.Split(','))
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .AllowCredentials();
+            var corsHosts = config.CorsHosts.Split(',');
+            if (corsHosts.Contains("*"))
+            {
+                // Allow any origin when wildcard is specified, but can't use credentials
+                policy.AllowAnyOrigin()
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
+            }
+            else
+            {
+                // Specific origins can use credentials
+                policy.WithOrigins(corsHosts)
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()
+                      .AllowCredentials();
+            }
         });
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.MapControllers();
 
         // Apply database migrations
         using var scope = app.Services.CreateScope();
