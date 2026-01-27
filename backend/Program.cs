@@ -43,12 +43,8 @@ public partial class Program
         // Register hosted services
         //builder.Services.AddHostedService<StockSymbolService>();
 
-        // Configure JWT Authentication
-        builder.Services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
+        // Configure Cookie-based JWT Authentication (compatible with AuthenticationController)
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
         {
             options.TokenValidationParameters = new TokenValidationParameters
@@ -60,38 +56,27 @@ public partial class Program
                 ValidIssuer = config.Token.Issuer,
                 ValidAudience = config.Token.Audience,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.Token.SecretKey)),
-                // Small clock skew to handle minor clock differences between servers
                 ClockSkew = TimeSpan.FromMinutes(1),
-                // Set custom claim types to match JWT token structure
                 NameClaimType = UserClaims.UserId,
                 RoleClaimType = UserClaims.Role
             };
 
-            // Configure cookie and header authentication for JWT
+            // Read JWT token from cookies (set by UserService.SignInAsync)
             options.Events = new JwtBearerEvents
             {
                 OnMessageReceived = context =>
                 {
-                    // First check for token in Authorization header (standard approach)
-                    var authHeader = context.Request.Headers.Authorization.ToString();
-                    if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                    // Read token from access_token cookie
+                    var accessToken = context.Request.Cookies[CookieConfiguration.AccessTokenName];
+                    if (!string.IsNullOrEmpty(accessToken))
                     {
-                        context.Token = authHeader.Substring("Bearer ".Length).Trim();
-                    }
-                    // Fall back to cookie-based token if not in header
-                    else
-                    {
-                        var accessToken = context.Request.Cookies[CookieConfiguration.AccessTokenName];
-                        if (!string.IsNullOrEmpty(accessToken))
-                        {
-                            context.Token = accessToken;
-                        }
+                        context.Token = accessToken;
                     }
                     return Task.CompletedTask;
                 }
             };
 
-            // Disable JWT claim type mapping to prevent automatic transformation
+            // Disable JWT claim type mapping
             options.MapInboundClaims = false;
         });
 
