@@ -1,35 +1,43 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
 using Backend.Configuration;
 using Backend.Data.Models.General;
 using Backend.Data.Models.Identity;
 using Backend.Data.Repositories.Identity;
 using Backend.Extensions.Identity;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Backend.Services.Identity
 {
       public class UserService(ApplicationConfiguration configuration, IServiceScopeFactory scopeFactory)
       {
+            private SymmetricSecurityKey GetSecurityKey()
+            {
+                var keyBytes = Encoding.UTF8.GetBytes(configuration.Token.SecretKey);
+                return new SymmetricSecurityKey(keyBytes);
+            }
+
+            private SigningCredentials GetSigningCredentials()
+            {
+                var securityKey = GetSecurityKey();
+                return new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha512);
+            }
+
             private string GenerateAccessToken(User user, Guid sessionId)
             {
-                  // build symmetric key from secret
-                  var keyBytes = Encoding.UTF8.GetBytes(configuration.Token.SecretKey);
-                  var securityKey = new SymmetricSecurityKey(keyBytes);
-
-                  // choose algorithm
-                  var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha512);
+                  var credentials = GetSigningCredentials();
 
                   // create JWT
                   var jwt = new JwtSecurityToken(
-                        issuer: configuration.Token.Issuer,
-                        audience: configuration.Token.Audience,
-                        claims: UserClaims.Create(user, sessionId),
-                        expires: DateTime.UtcNow.AddSeconds(configuration.Token.AccessExpirationInSeconds),
-                        signingCredentials: credentials
+                      issuer: configuration.Token.Issuer,
+                      audience: configuration.Token.Audience,
+                      claims: UserClaims.Create(user, sessionId),
+                      expires: DateTime.UtcNow.AddSeconds(configuration.Token.AccessExpirationInSeconds),
+                      signingCredentials: credentials
                   );
 
                   // serialize JWT
@@ -57,48 +65,104 @@ namespace Backend.Services.Identity
             });
         }
 
-        private async Task<UserSession?> RevokeSession(Guid sessionId)
+        public async Task<(string?, UserSession?)> RenewSession(HttpContext context)
         {
+            // find session
             using var scope = scopeFactory.CreateScope();
             var sessionRepository = scope.ServiceProvider.GetRequiredService<IUserSessionRepository>();
+            var sessionId = context.User.GetSessionId();
             var session = await sessionRepository.GetByIdAsync(sessionId);
-            if (session is null) return null;
-            session.RevokedAt = DateTimeOffset.UtcNow;
+            if (session is null) return (null, null);
+
+            // find user
+            var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+            var user = await userRepository.GetByIdAsync(context.User.GetId());
+            if (user is null) return (null, null);
+
+            // check if revoked
+            if (session.RevokedAt is not null)
+                return (null, null);
+
+            // create sesion & tokens
+            var refreshToken = GenerateRefreshToken();
+            var accessToken = GenerateAccessToken(user, session.Id);
+
+            // update session
+            session.RefreshToken = refreshToken;
+            session.ExpiresAt = DateTimeOffset.UtcNow.AddSeconds(configuration.Token.RefreshExpirationInSeconds);
             var updated = await sessionRepository.UpdateAsync(session);
-            var appCache = scope.ServiceProvider.GetRequiredService<AppCache>();
-            appCache.RevokedSessionIds.Push(sessionId);
-            return updated;
+
+            // set cookies
+            var cookieOptions = GetCookieOptions();
+            context.Response.Cookies.Append(CookieConfiguration.AccessTokenName, accessToken, cookieOptions);
+            context.Response.Cookies.Append(CookieConfiguration.RefreshTokenName, refreshToken, cookieOptions);
+            return (accessToken, session);
         }
 
-        public bool VerifyPassword(User user, string password)
-        {
-            var hasher = new PasswordHasher<User>();
-            var result = hasher.VerifyHashedPassword(user, user.PasswordHash, password);
-            return result == PasswordVerificationResult.Success;
-        }
-
-        public User SetPassword(User user, string newPassword)
-        {
-            var hasher = new PasswordHasher<User>();
-            user.PasswordHash = hasher.HashPassword(user, newPassword);
-            return user;
-        }
-
-        private CookieOptions GetCookieOptions()
-        {
-            return new()
+        private async Task<UserSession?> RevokeSession(Guid sessionId)
             {
-                HttpOnly = true,
-                Secure = true,
-                IsEssential = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddSeconds(configuration.Token.AccessExpirationInSeconds),
-                Domain = configuration.Cookie.Domain,
-                Path = configuration.Cookie.Path,
-            };
-        }
+                 using var scope = scopeFactory.CreateScope();
+                 var sessionRepository = scope.ServiceProvider.GetRequiredService<IUserSessionRepository>();
+                 var session = await sessionRepository.GetByIdAsync(sessionId);
+                 if (session is null) return null;
+                 session.RevokedAt = DateTimeOffset.UtcNow;
+                 var updated = await sessionRepository.UpdateAsync(session);
+                 var appCache = scope.ServiceProvider.GetRequiredService<AppCache>();
+                 appCache.RevokedSessionIds.Push(sessionId);
+                 return updated;
+            }
 
-        public async Task<UserSession> SignInAsync(HttpContext httpContext, User user)
+            public bool VerifyPassword(User user, string password)
+            {
+                 var hasher = new PasswordHasher<User>();
+                 var result = hasher.VerifyHashedPassword(user, user.PasswordHash, password);
+                 return result == PasswordVerificationResult.Success;
+            }
+
+            public async Task<bool> ValidateTokenAsync(HttpContext context, bool validateLifetime)
+            {
+                 if (!context.Request.Cookies.ContainsKey(CookieConfiguration.AccessTokenName))
+                     return false;
+            var accessToken = context.Request.Cookies[CookieConfiguration.AccessTokenName];
+
+                 var key = GetSecurityKey();
+
+                 var jwt = new TokenValidationParameters
+                 {
+                     IssuerSigningKey = key,
+                     ValidIssuer = configuration.Token.Issuer,
+                     ValidAudience = configuration.Token.Audience,
+                     ValidateIssuerSigningKey = true,
+                     ValidateIssuer = true,
+                     ValidateAudience = true,
+                     ValidateLifetime = validateLifetime,
+                 };
+
+                 return (await new JwtSecurityTokenHandler().ValidateTokenAsync(accessToken, jwt)).IsValid;
+            }
+
+            public User SetPassword(User user, string newPassword)
+            {
+                 var hasher = new PasswordHasher<User>();
+                 user.PasswordHash = hasher.HashPassword(user, newPassword);
+                 return user;
+            }
+
+            private CookieOptions GetCookieOptions()
+            {
+                    return new()
+                    {
+                        HttpOnly = true,
+                        Secure = true,
+                        IsEssential = true,
+                        SameSite = SameSiteMode.Strict,
+                        Expires = DateTimeOffset.UtcNow.AddSeconds(configuration.Token.AccessExpirationInSeconds),
+                        Domain = configuration.Cookie.Domain,
+                        Path = configuration.Cookie.Path,
+                    };
+            }
+
+        public async Task<(string, UserSession)> SignInAsync(HttpContext httpContext, User user)
         {
             // create sesion & tokens
             var refreshToken = GenerateRefreshToken();
@@ -108,7 +172,7 @@ namespace Backend.Services.Identity
             var cookieOptions = GetCookieOptions();
             httpContext.Response.Cookies.Append(CookieConfiguration.AccessTokenName, accessToken, cookieOptions);
             httpContext.Response.Cookies.Append(CookieConfiguration.RefreshTokenName, refreshToken, cookieOptions);
-            return session;
+            return (accessToken, session);
         }
 
         public async Task<UserSession?> SignOutAsync(HttpContext httpContext)

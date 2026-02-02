@@ -32,13 +32,11 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
   </ItemGroup>
 
-	<!--
   <Target Name="NSwag" BeforeTargets="AfterBuild" Condition=" '$(Configuration)' ==&#xD;&#xA;  'Debug' ">
     <Exec WorkingDirectory="$(ProjectDir)" EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development" Command="$(NSwagExe_Net90) run nswag.json /variables:Configuration=$(Configuration)">
       <Output TaskParameter="ExitCode" PropertyName="NswagExitCode" />
       <Output TaskParameter="ConsoleOutput" PropertyName="NswagOutput" />
     </Exec>
   </Target>
-  -->
 
 </Project>

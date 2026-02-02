@@ -2,17 +2,17 @@
 using Backend.Data.Enums.Identity;
 using Backend.Data.Models.Identity;
 using Backend.Data.Repositories.Identity;
-using Backend.Extensions.Identity;
 using Backend.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers.Identity
 {
+    [ApiController]
     public class AuthenticationController(IUserRepository userRepository, UserService userService): Controller
     {
         [HttpPost("/register")]
-        public async Task<ActionResult<UserSession>> Register([FromBody] RegisterForm form)
+        public async Task<ActionResult<UserSessionOut>> Register([FromBody] RegisterForm form)
         {
             var user = new User()
             {
@@ -30,7 +30,7 @@ namespace backend.Controllers.Identity
         }
 
         [HttpPost("/login")]
-        public async Task<ActionResult<UserSession>> Login([FromBody] LoginForm form)
+        public async Task<ActionResult<UserSessionOut>> Login([FromBody] LoginForm form)
         {
             // check if user exists
             var user = await userRepository.GetByEmailAsync(form.Email);
@@ -45,20 +45,37 @@ namespace backend.Controllers.Identity
                 return Unauthorized();
             }
             // sign in
-            var session = await userService.SignInAsync(HttpContext, user);
-            return Ok(session);
+            var (accessToken, session) = await userService.SignInAsync(HttpContext, user);
+            return Ok(new UserSessionOut(session, accessToken));
+        }
+
+        [HttpPost("/refresh-token")]
+        public async Task<ActionResult<UserSession>> RefreshToken()
+        {
+            if (!await userService.ValidateTokenAsync(HttpContext, validateLifetime: false))
+            {
+                return Unauthorized();
+            }
+
+            var (accessToken, session) = await userService.RenewSession(HttpContext);
+            if (accessToken is null || session is null)
+            {
+                return Unauthorized();
+            }
+
+            return Ok(new UserSessionOut(session, accessToken));
         }
 
         [Authorize]
         [HttpPost("/logout")]
-        public async Task<ActionResult<UserSession>> Logout()
+        public async Task<IActionResult> Logout()
         {
             var session = await userService.SignOutAsync(HttpContext);
             if (session is null)
             {
-                return Unauthorized(); 
+                return Unauthorized();
             }
-            return Ok(session);
+            return NoContent();
         }
     }
 }
