@@ -1,6 +1,6 @@
 # Authentication Implementation
 
-This document describes the authentication implementation in the gaming application.
+This document describes the authentication implementation in the stock trading application.
 
 ## Overview
 

@@ -89,9 +89,6 @@
 					<Field>
 						<div class="flex items-center">
 							<FieldLabel for="password-{id}">Password</FieldLabel>
-							<a href="##" class="ml-auto text-sm underline-offset-4 hover:underline">
-								Forgot your password?
-							</a>
 						</div>
 						<Input id="password-{id}" type="password" bind:value={password} required />
 					</Field>
@@ -107,8 +104,7 @@
 			</form>
 		</Card.Content>
 	</Card.Root>
-	<FieldDescription class="px-6 text-center">
-		By clicking continue, you agree to our <a href="##">Terms of Service</a>
-		and <a href="##">Privacy Policy</a>.
+	<FieldDescription class="px-6 text-center text-muted-foreground text-xs">
+		By clicking continue, you agree to our Terms of Service and Privacy Policy.
 	</FieldDescription>
 </div>
