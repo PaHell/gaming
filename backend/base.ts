@@ -1,6 +1,8 @@
 export abstract class ClientBase {
       protected async transformOptions(options: RequestInit): Promise<RequestInit> {
-            // Modify request options here (e.g., add headers)
+            // Automatically include credentials (cookies) with all requests
+            // This ensures JWT tokens stored in HTTP-only cookies are sent to the backend
+            // No need to pass cookie options to frontend - handled automatically
             options.credentials = "include";
             return options;
       }
