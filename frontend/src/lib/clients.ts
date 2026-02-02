@@ -19,6 +19,149 @@ export abstract class ClientBase {
       }
 }
 
+export interface IAuthenticationClient {
+    register(form: RegisterForm): Promise<UserSession>;
+    login(form: LoginForm): Promise<UserSession>;
+    logout(): Promise<UserSession>;
+}
+
+export class AuthenticationClient extends ClientBase implements IAuthenticationClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        super();
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    register(form: RegisterForm): Promise<UserSession> {
+        let url_ = this.baseUrl + "/register";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(form);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processRegister(_response));
+        });
+    }
+
+    protected processRegister(response: Response): Promise<UserSession> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+                let result200: any = null;
+                result200 = _responseText === "" ? null : jsonParse(_responseText, this.jsonParseReviver) as UserSession;
+                return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+                return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+                return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserSession>(null as any);
+    }
+
+    login(form: LoginForm): Promise<UserSession> {
+        let url_ = this.baseUrl + "/login";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(form);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processLogin(_response));
+        });
+    }
+
+    protected processLogin(response: Response): Promise<UserSession> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+                let result200: any = null;
+                result200 = _responseText === "" ? null : jsonParse(_responseText, this.jsonParseReviver) as UserSession;
+                return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+                return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+                return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserSession>(null as any);
+    }
+
+    logout(): Promise<UserSession> {
+        let url_ = this.baseUrl + "/logout";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "POST",
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.transformOptions(options_).then(transformedOptions_ => {
+            return this.http.fetch(url_, transformedOptions_);
+        }).then((_response: Response) => {
+            return this.transformResult(url_, _response, (_response: Response) => this.processLogout(_response));
+        });
+    }
+
+    protected processLogout(response: Response): Promise<UserSession> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+                let result200: any = null;
+                result200 = _responseText === "" ? null : jsonParse(_responseText, this.jsonParseReviver) as UserSession;
+                return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+                return throwException("Unauthorized", status, _responseText, _headers);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+                return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<UserSession>(null as any);
+    }
+}
+
 export interface ICountryClient {
 
     getAll(): Promise<CountryMetadata[]>;
@@ -411,6 +554,26 @@ export interface CountryMetadata {
     defaultSpread?: number | null;
     countryRiskPremium?: number | null;
     equityRiskPremium?: number | null;
+}
+
+export interface LoginForm {
+    email: string;
+    password: string;
+}
+
+export interface RegisterForm {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+}
+
+export interface UserSession {
+    id?: string | null;
+    userId?: string | null;
+    refreshToken?: string | null;
+    expiresAt?: string | null;
+    revokedAt?: string | null;
 }
 
 export interface MarketNews {

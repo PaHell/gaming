@@ -12,7 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Backend.Services.Identity
 {
-      public class UserService(ApplicationConfiguration configuration, IServiceScopeFactory scopeFactory)
+      public class UserService(ApplicationConfiguration configuration, IServiceScopeFactory scopeFactory, ILogger<UserService> logger)
       {
             private string GenerateAccessToken(User user, Guid sessionId)
             {
@@ -100,6 +100,8 @@ namespace Backend.Services.Identity
 
         public async Task<UserSession> SignInAsync(HttpContext httpContext, User user)
         {
+            logger.LogInformation("SignInAsync called for UserId: {UserId}, Email: {Email}", user.Id, user.Email);
+            
             // create sesion & tokens
             var refreshToken = GenerateRefreshToken();
             var session = await CreateSession(user, refreshToken);
@@ -108,13 +110,28 @@ namespace Backend.Services.Identity
             var cookieOptions = GetCookieOptions();
             httpContext.Response.Cookies.Append(CookieConfiguration.AccessTokenName, accessToken, cookieOptions);
             httpContext.Response.Cookies.Append(CookieConfiguration.RefreshTokenName, refreshToken, cookieOptions);
+            
+            logger.LogInformation("SignInAsync completed - SessionId: {SessionId}, UserId: {UserId}", session.Id, user.Id);
             return session;
         }
 
         public async Task<UserSession?> SignOutAsync(HttpContext httpContext)
         {
             var sessionId = httpContext.User.GetSessionId();
-            return await RevokeSession(sessionId);
+            logger.LogInformation("SignOutAsync called for SessionId: {SessionId}", sessionId);
+            
+            var result = await RevokeSession(sessionId);
+            
+            if (result != null)
+            {
+                logger.LogInformation("SignOutAsync completed - SessionId: {SessionId}", sessionId);
+            }
+            else
+            {
+                logger.LogWarning("SignOutAsync failed - session not found: {SessionId}", sessionId);
+            }
+            
+            return result;
         }
 
     }

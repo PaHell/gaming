@@ -15,7 +15,7 @@
 	import { Calendar } from '$lib/shadcn/components/ui/calendar/index.js';
 	import * as Popover from '$lib/shadcn/components/ui/popover/index.js';
 	import type { FormEventHandler } from 'svelte/elements';
-	import { StockClient, type SymbolLookup } from '@/clients';
+	import { StockSymbolClient, type SymbolLookup } from '@/clients';
 	import { debounce } from '@/custom/debounce';
 	import { env } from '$env/dynamic/public';
 	import * as Command from '$lib/shadcn/components/ui/command/index.js';
@@ -35,7 +35,7 @@
 		try {
 			isSearching = true;
 			console.log('Searching for:', searchValue);
-			const client = new StockClient(env.PUBLIC_BACKEND_URL_CLIENT);
+			const client = new StockSymbolClient(env.PUBLIC_BACKEND_URL_CLIENT);
 			searchResults = await client.search(searchValue);
 			console.log('Search results:', searchResults);
 		} catch (error) {

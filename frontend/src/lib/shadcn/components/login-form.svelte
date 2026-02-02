@@ -11,10 +11,43 @@
 	import { Input } from "$lib/shadcn/components/ui/input/index.js";
 	import { cn } from "$lib/shadcn/utils.js";
 	import type { HTMLAttributes } from "svelte/elements";
+	import { AuthenticationClient } from "$lib/clients.js";
+	import { env } from '$env/dynamic/public';
+	import { goto } from '$app/navigation';
+	import { toast } from 'svelte-sonner';
 
 	let { class: className, ...restProps }: HTMLAttributes<HTMLDivElement> = $props();
 
 	const id = $props.id();
+	
+	let email = $state('');
+	let password = $state('');
+	let loading = $state(false);
+
+	const authClient = new AuthenticationClient(env.PUBLIC_BACKEND_URL_CLIENT);
+
+	async function handleSubmit(event: Event) {
+		event.preventDefault();
+		loading = true;
+
+		console.log('Login attempt:', { email });
+
+		try {
+			const session = await authClient.login({ email, password });
+			console.log('Login successful:', { sessionId: session.id, userId: session.userId });
+			toast.success('Login successful! Redirecting...');
+			goto('/app/dashboard');
+		} catch (error: any) {
+			console.error('Login failed:', error);
+			if (error?.status === 401) {
+				toast.error('Invalid email or password');
+			} else {
+				toast.error('Login failed. Please try again.');
+			}
+		} finally {
+			loading = false;
+		}
+	}
 </script>
 
 <div class={cn("flex flex-col gap-6", className)} {...restProps}>
@@ -24,7 +57,7 @@
 			<Card.Description>Login with your Apple or Google account</Card.Description>
 		</Card.Header>
 		<Card.Content>
-			<form>
+			<form onsubmit={handleSubmit}>
 				<FieldGroup>
 					<Field>
 						<Button variant="outline" type="button">
@@ -51,7 +84,7 @@
 					</FieldSeparator>
 					<Field>
 						<FieldLabel for="email-{id}">Email</FieldLabel>
-						<Input id="email-{id}" type="email" placeholder="m@example.com" required />
+						<Input id="email-{id}" type="email" placeholder="m@example.com" bind:value={email} required />
 					</Field>
 					<Field>
 						<div class="flex items-center">
@@ -60,12 +93,14 @@
 								Forgot your password?
 							</a>
 						</div>
-						<Input id="password-{id}" type="password" required />
+						<Input id="password-{id}" type="password" bind:value={password} required />
 					</Field>
 					<Field>
-						<Button type="submit">Login</Button>
+						<Button type="submit" disabled={loading}>
+							{loading ? 'Logging in...' : 'Login'}
+						</Button>
 						<FieldDescription class="text-center">
-							Don't have an account? <a href="##">Sign up</a>
+							Don't have an account? <a href="/auth/register">Sign up</a>
 						</FieldDescription>
 					</Field>
 				</FieldGroup>

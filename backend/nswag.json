@@ -1,5 +1,5 @@
 {
-  "runtime": "Net90",
+  "runtime": "Net100",
   "defaultVariables": "OutputPath=../frontend/src/lib",
   "documentGenerator": {
     "aspNetCoreToOpenApi": {
